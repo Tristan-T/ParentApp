@@ -11,4 +11,9 @@
     <string name="error_email">Invalid Email</string>
     <string name="error_password">Password must be at least 8 characters long, and contain one uppercase letter, one lowercase and one number</string>
     <string name="error_name">Name cannot be empty</string>
+    <string name="error_signup">User cannot be created at this time, please try again later</string>
+    <string name="welcomeBack">Welcome back!</string>
+    <string name="log_in_message">Please <b>login</b> below and resume your spying activities!</string>
+    <string name="login_failed">Login Failed, please check your email and password</string>
+    <string name="empty_password">Password cannot be empty</string>
 </resources>

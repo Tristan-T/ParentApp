@@ -28,80 +28,11 @@ public class SignUpActivity extends AppCompatActivity {
         TextInputLayout emailLayout = findViewById(R.id.email_signup_layout);
         TextInputLayout passwordLayout = findViewById(R.id.password_signup_layout);
 
-        nameLayout.getEditText().addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        nameLayout.getEditText().addTextChangedListener(new NameWatcher(nameLayout));
 
-            }
+        emailLayout.getEditText().addTextChangedListener(new EmailWatcher(emailLayout));
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() > 0) {
-                    nameLayout.setError(null);
-                } else {
-                    nameLayout.setError(getString(R.string.error_name));
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-        emailLayout.getEditText().addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if(!TextUtils.isEmpty(charSequence) && Patterns.EMAIL_ADDRESS.matcher(charSequence).matches()){
-                    emailLayout.setError(null);
-                } else {
-                    emailLayout.setError(getString(R.string.error_email));
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
-        passwordLayout.getEditText().addTextChangedListener(new TextWatcher() {
-            //CF : https://stackoverflow.com/questions/36574183/how-to-validate-password-field-in-android
-            public boolean isValidPassword(final String password) {
-                Pattern pattern;
-                Matcher matcher;
-                final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d\\w\\W]{8,}$";
-                pattern = Pattern.compile(PASSWORD_PATTERN);
-                matcher = pattern.matcher(password);
-
-                return matcher.matches();
-
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if(!isValidPassword(charSequence.toString())){
-                    passwordLayout.setError(getString(R.string.error_password));
-                } else {
-                    passwordLayout.setError(null);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
+        passwordLayout.getEditText().addTextChangedListener(new PasswordWatcher(passwordLayout));
 
 
     }
@@ -111,7 +42,6 @@ public class SignUpActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.putExtra("email", getIntent().getStringExtra("email"));
         startActivity(intent);
-        finish();
     }
 
     public void onSignupClick(View view) {
@@ -136,8 +66,20 @@ public class SignUpActivity extends AppCompatActivity {
         //Check if all fields are properly filled
         if(nameLayout.getError() == null && emailLayout.getError() == null && passwordLayout.getError() == null) {
             //If all fields are filled, go to login activity
-            Toast.makeText(this, "All fields are filled correctly", Toast.LENGTH_SHORT).show();
-            finish();
+            try {
+                if(User.createUser(nameLayout.getEditText().getText().toString(), emailLayout.getEditText().getText().toString(), passwordLayout.getEditText().getText().toString())) {
+                    //Launch LoginActivity
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    intent.putExtra("email", emailLayout.getEditText().getText().toString());
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(this, getString(R.string.error_signup), Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                //TODO : CATCH PROPER ERRORS
+                Toast.makeText(this, getString(R.string.error_signup), Toast.LENGTH_SHORT).show();
+            }
         }
 
     }
