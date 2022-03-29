@@ -24,8 +24,30 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up);
 
         //Set validation on email and password
+        TextInputLayout nameLayout = findViewById(R.id.name_signup_layout);
         TextInputLayout emailLayout = findViewById(R.id.email_signup_layout);
         TextInputLayout passwordLayout = findViewById(R.id.password_signup_layout);
+
+        nameLayout.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() > 0) {
+                    nameLayout.setError(null);
+                } else {
+                    nameLayout.setError(getString(R.string.error_name));
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         emailLayout.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
@@ -53,7 +75,7 @@ public class SignUpActivity extends AppCompatActivity {
             public boolean isValidPassword(final String password) {
                 Pattern pattern;
                 Matcher matcher;
-                final String PASSWORD_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
+                final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d\\w\\W]{8,}$";
                 pattern = Pattern.compile(PASSWORD_PATTERN);
                 matcher = pattern.matcher(password);
 
@@ -103,7 +125,16 @@ public class SignUpActivity extends AppCompatActivity {
             nameLayout.setError(getString(R.string.error_name));
         }
 
-        if(emailLayout.getError() != null && passwordLayout.getError() != null) {
+        if(TextUtils.isEmpty(emailLayout.getEditText().getText().toString())){
+            emailLayout.setError(getString(R.string.error_email));
+        }
+
+        if(TextUtils.isEmpty(passwordLayout.getEditText().getText().toString())){
+            passwordLayout.setError(getString(R.string.error_password));
+        }
+
+        //Check if all fields are properly filled
+        if(nameLayout.getError() == null && emailLayout.getError() == null && passwordLayout.getError() == null) {
             //If all fields are filled, go to login activity
             Toast.makeText(this, "All fields are filled correctly", Toast.LENGTH_SHORT).show();
             finish();

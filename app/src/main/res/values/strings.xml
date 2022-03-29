@@ -9,6 +9,6 @@
     <string name="already_have_an_account">"Already have an account ? "</string>
     <string name="login">Log in</string>
     <string name="error_email">Invalid Email</string>
-    <string name="error_password">Password must be at least 8 characters long, and contain one letter and one number</string>
+    <string name="error_password">Password must be at least 8 characters long, and contain one uppercase letter, one lowercase and one number</string>
     <string name="error_name">Name cannot be empty</string>
 </resources>
