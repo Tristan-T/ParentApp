@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">ParentApp</string>
+    <string name="welcome">Welcome!</string>
+    <string name="sign_up_message">Create your account for free <b> now </b> and spy on your kid <b>today</b>!</string>
+    <string name="nameSignup">Name</string>
+    <string name="emailSignup">Email</string>
+    <string name="passwordSignup">Password</string>
+    <string name="sign_up">Sign up</string>
+    <string name="already_have_an_account">"Already have an account ? "</string>
+    <string name="login">Log in</string>
+</resources>
