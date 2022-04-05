@@ -96,6 +96,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
+            android:paddingTop="5dp"
             android:id="@+id/materialButton"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="wrap_content"
