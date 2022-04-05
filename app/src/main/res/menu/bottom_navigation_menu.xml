@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/bottom_navigation_menu_item_data"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_folder_shared_24"
+        android:title="@string/data"/>
+    <item
+        android:id="@+id/bottom_navigation_menu_item_camera"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_linked_camera_24"
+        android:title="@string/camera"/>
+    <item
+        android:id="@+id/bottom_navigation_menu_item_map"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_location_searching_24"
+        android:title="@string/find"/>
+    <item
+        android:id="@+id/bottom_navigation_menu_item_alert"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_add_alert_24"
+        android:title="@string/alert"/>
+    <item
+        android:id="@+id/bottom_navigation_menu_item_account"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_account_circle_24"
+        android:title="@string/account"/>
+
+</menu>
