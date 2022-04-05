@@ -108,6 +108,8 @@ public class SignUpActivity extends AppCompatActivity {
                                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                         .setDisplayName(name)
                                         .build();
+
+                                user.updateProfile(profileUpdates);
                                 // Launch MainActivity
                                 Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -116,7 +118,7 @@ public class SignUpActivity extends AppCompatActivity {
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "SignUpActivity:failure", task.getException());
-                                Toast.makeText(SignUpActivity.this, getString(R.string.error_signup), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SignUpActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
