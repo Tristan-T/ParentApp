@@ -33,7 +33,8 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 // Google recommends to use if instead of switches}
                 if(item.getItemId() == R.id.bottom_navigation_menu_item_data) {
-                    //getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerMain, new DataFragment()).commit();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerMain, new DataFragment()).commit();
+                    //getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerMain, new DataListFragment()).commit();
                     return true;
                 }
 
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void onDeleteClick(View view) {
-        AlertDialog builder = new MaterialAlertDialogBuilder(this,
+        new MaterialAlertDialogBuilder(this,
             com.google.android.material.R.style.MaterialAlertDialog_Material3)
             .setMessage("Are you sure you want to delete your account?")
             .setPositiveButton(R.string.Yes, (dialog, which) -> {
