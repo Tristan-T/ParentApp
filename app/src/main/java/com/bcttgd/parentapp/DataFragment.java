@@ -2,6 +2,7 @@ package com.bcttgd.parentapp;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.PeriodicSync;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -16,6 +17,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,38 +44,36 @@ public class DataFragment extends Fragment {
 
     }
 
-    private void sendData(String folderName, File[] files) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://devmobilem1-default-rtdb.europe-west1.firebasedatabase.app");
-        //Check that folderName does not contain ".", "#", "$", "[", "]" with regex
-        if (folderName.matches("[^.#$\\[\\]]+")) {
-            Log.d(TAG, "sendData: NOT FOUND INVALID CHARACTER : " + folderName);
-            DatabaseReference myRef = database.getReference(folderName);
-
-            ArrayList<String> fileNames = new ArrayList<>();
-            for(File file : files) {
-                fileNames.add(file.getName());
-            }
-            myRef.setValue(fileNames);
-        }
-    }
-
     private void getData() {
+        //For all external storage that are accessible
+        getData("/storage/");
+        //For internal storage
         getData(Environment.getExternalStorageDirectory().getAbsolutePath());
     }
 
     private void getData(String folderName) {
+        //Check if folderName contains '.', '#', '$', '[', or ']'
+        if (folderName.contains(".") || folderName.contains("#") || folderName.contains("$") || folderName.contains("[") || folderName.contains("]")) {
+            return;
+        }
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://devmobilem1-default-rtdb.europe-west1.firebasedatabase.app");
+        DatabaseReference myRef = database.getReference(folderName);
+
         File home = new File(folderName);
-        Log.d("DataFragment", "Home: " + home.getAbsolutePath());
+
         File[] files = home.listFiles();
-        //Check that there are files in the folder
-        if (files != null) {
-            sendData(folderName, files);
+        ArrayList<String> fileNames = new ArrayList<>();
+        if(files != null) {
             for (File file : files) {
-                if (file.isDirectory()) {
-                    Log.d("DataFragment", "Directory: " + file.getName());
-                    getData(folderName + "/" + file.getName());
-                } else {
-                    Log.d("DataFragment", "File: " + file.getName());
+                if (!file.isDirectory()) {
+                    fileNames.add(file.getName());
+                }
+            }
+            myRef.setValue(fileNames);
+            for(File file : files) {
+                if(file.isDirectory()) {
+                    getData(file.getAbsolutePath());
                 }
             }
         }
