@@ -1,9 +1,11 @@
-package com.bcttgd.parentapp;
+package com.bcttgd.parentapp.Watchers;
 
 import android.content.res.Resources;
 import android.text.Editable;
 import android.text.TextWatcher;
 
+import com.bcttgd.parentapp.App;
+import com.bcttgd.parentapp.R;
 import com.google.android.material.textfield.TextInputLayout;
 
 public class NameWatcher implements TextWatcher {

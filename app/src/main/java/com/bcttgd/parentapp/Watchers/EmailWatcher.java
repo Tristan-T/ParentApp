@@ -1,4 +1,4 @@
-package com.bcttgd.parentapp;
+package com.bcttgd.parentapp.Watchers;
 
 import android.app.Application;
 import android.content.res.Resources;
@@ -7,6 +7,8 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Patterns;
 
+import com.bcttgd.parentapp.App;
+import com.bcttgd.parentapp.R;
 import com.google.android.material.textfield.TextInputLayout;
 
 public class EmailWatcher implements TextWatcher {

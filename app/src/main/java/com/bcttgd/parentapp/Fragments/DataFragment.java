@@ -1,4 +1,4 @@
-package com.bcttgd.parentapp;
+package com.bcttgd.parentapp.Fragments;
 
 import static android.content.ContentValues.TAG;
 
@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bcttgd.parentapp.R;
 import com.bcttgd.parentapp.Workers.UploadFileListWorker;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;

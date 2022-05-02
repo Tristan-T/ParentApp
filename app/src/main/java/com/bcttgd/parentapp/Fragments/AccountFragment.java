@@ -1,4 +1,4 @@
-package com.bcttgd.parentapp;
+package com.bcttgd.parentapp.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bcttgd.parentapp.R;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class AccountFragment extends Fragment {
