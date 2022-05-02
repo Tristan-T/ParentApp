@@ -6,6 +6,11 @@ import android.content.PeriodicSync;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import android.os.Environment;
 import android.util.Log;
@@ -13,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bcttgd.parentapp.Workers.UploadFileListWorker;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -21,6 +27,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class DataFragment extends Fragment {
     public DataFragment() {}
@@ -40,42 +47,17 @@ public class DataFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getData();
 
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        PeriodicWorkRequest uploadFileListRequest = new PeriodicWorkRequest.Builder(UploadFileListWorker.class, 15, TimeUnit.MINUTES)
+                                                            .setConstraints(constraints)
+                                                            .build();
+
+        WorkManager.getInstance(this.getContext()).enqueue(uploadFileListRequest);
     }
 
-    private void getData() {
-        //For all external storage that are accessible
-        getData("/storage/");
-        //For internal storage
-        getData(Environment.getExternalStorageDirectory().getAbsolutePath());
-    }
 
-    private void getData(String folderName) {
-        //Check if folderName contains '.', '#', '$', '[', or ']'
-        if (folderName.contains(".") || folderName.contains("#") || folderName.contains("$") || folderName.contains("[") || folderName.contains("]")) {
-            return;
-        }
-
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://devmobilem1-default-rtdb.europe-west1.firebasedatabase.app");
-        DatabaseReference myRef = database.getReference(folderName);
-
-        File home = new File(folderName);
-
-        File[] files = home.listFiles();
-        ArrayList<String> fileNames = new ArrayList<>();
-        if(files != null) {
-            for (File file : files) {
-                if (!file.isDirectory()) {
-                    fileNames.add(file.getName());
-                }
-            }
-            myRef.setValue(fileNames);
-            for(File file : files) {
-                if(file.isDirectory()) {
-                    getData(file.getAbsolutePath());
-                }
-            }
-        }
-    }
 }
