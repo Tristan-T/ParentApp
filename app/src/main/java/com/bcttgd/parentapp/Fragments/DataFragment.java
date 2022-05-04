@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bcttgd.parentapp.R;
-import com.bcttgd.parentapp.Workers.UploadFileListWorker;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -48,16 +47,6 @@ public class DataFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build();
-
-        PeriodicWorkRequest uploadFileListRequest = new PeriodicWorkRequest.Builder(UploadFileListWorker.class, 15, TimeUnit.MINUTES)
-                                                            .setConstraints(constraints)
-                                                            .build();
-
-        WorkManager.getInstance(this.getContext()).enqueue(uploadFileListRequest);
     }
 
 

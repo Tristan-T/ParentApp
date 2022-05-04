@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "585968610211",
+	"firebase_url": "https://devmobilem1-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "devmobilem1",
     "storage_bucket": "devmobilem1.appspot.com"
   },
