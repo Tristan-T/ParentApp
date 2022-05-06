@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.bcttgd.parentapp.Fragments.AccountFragment;
+import com.bcttgd.parentapp.Fragments.AlertFragment;
 import com.bcttgd.parentapp.Fragments.DataFragment;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if(item.getItemId() == R.id.bottom_navigation_menu_item_alert) {
-                    //getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerMain, new AlertFragment()).commit();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerMain, new AlertFragment()).commit();
                     return true;
                 }
 
