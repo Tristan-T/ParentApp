@@ -3,17 +3,6 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1985" />
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/layout/activity_log_in.xml" value="0.1707193515704154" />
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/layout/activity_main.xml" value="0.178125" />
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/layout/activity_sign_up.xml" value="0.15896739130434784" />
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/layout/fragment_account.xml" value="0.17291666666666666" />
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/layout/fragment_alert.xml" value="0.29981884057971014" />
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/layout/fragment_data.xml" value="0.17291666666666666" />
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/layout/fragment_data_item.xml" value="0.17291666666666666" />
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/layout/fragment_data_item_list.xml" value="0.17291666666666666" />
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1495" />
-        <entry key="..\:/Users/Camille/Desktop/ParentApp/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1865" />
         <entry key="..\:/Users/Tristan/StudioProjects/ParentApp/app/src/main/res/layout/activity_launcher.xml" value="0.19895833333333332" />
         <entry key="..\:/Users/Tristan/StudioProjects/ParentApp/app/src/main/res/layout/activity_log_in.xml" value="0.22795969773299748" />
         <entry key="..\:/Users/Tristan/StudioProjects/ParentApp/app/src/main/res/layout/activity_sign_up.xml" value="0.33" />
@@ -29,6 +18,7 @@
         <entry key="..\:/Users/Triston/AndroidStudioProjects/ParentApp/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.3453125" />
         <entry key="..\:/Users/Triston/AndroidStudioProjects/ParentApp/app/src/main/res/menu/top_app_bar.xml" value="0.19479166666666667" />
         <entry key="..\:/Users/Triston/AndroidStudioProjects/ParentApp/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2285" />
+        <entry key="..\:/Users/Triston/AndroidStudioProjects/ParentApp/app/src/main/res/xml/root_preferences.xml" value="0.30052083333333335" />
       </map>
     </option>
   </component>

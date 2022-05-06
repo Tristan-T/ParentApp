@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     Menu menu;
     FirebaseAuth mAuth;
     FirebaseUser user;
-    String selectedDevice;
+    public String selectedDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,10 +59,14 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                // Google recommends to use if instead of switches}
+                Bundle bundle = new Bundle();
+                bundle.putString("device", selectedDevice);
+                // Google recommends to use if instead of switches
                 if(item.getItemId() == R.id.bottom_navigation_menu_item_data) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerMain, new DataFragment()).commit();
-                    //getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerMain, new DataListFragment()).commit();
+                    //Pass the selected device to the fragment
+                    DataFragment dataFragment = new DataFragment();
+                    dataFragment.setArguments(bundle);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerMain, dataFragment).commit();
                     return true;
                 }
 
@@ -166,7 +170,8 @@ public class MainActivity extends AppCompatActivity {
                 drawerLayout.closeDrawers();
 
                 //Get the device ID
-                String deviceID = deviceIDs.get(deviceIDs.indexOf(item));
+                Log.d(TAG, "Device ID: " + deviceIDs.get(item.getItemId()));
+                String deviceID = deviceIDs.get(item.getItemId());
                 //Set the device ID
                 selectedDevice = deviceID;
                 return true;
