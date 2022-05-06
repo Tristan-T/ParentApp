@@ -99,7 +99,7 @@ public class MapFragment extends Fragment implements
     ExtendedFloatingActionButton fab;
     List<LatLng> latLngList = new ArrayList<>();
     List<Marker> markerList = new ArrayList<>();
-    Polygon currentPolygon;
+    Polygon currentPolygon = null;
     String areaName;
     String areaTag;
     List<Area> areaList = new ArrayList<>();
@@ -172,8 +172,8 @@ public class MapFragment extends Fragment implements
             TextView areaNameInfoTv = infoDialogView.findViewById(R.id.areaNameInfo);
             TextView areaTagInfoTv = infoDialogView.findViewById(R.id.areaTagInfo);
 
-            areaNameInfoTv.setText("Nom : " + area.getName());
-            areaTagInfoTv.setText("Caractéristique : " + area.getTag());
+            areaNameInfoTv.setText(String.format("%s%s", getString(R.string.areaNameTitle), area.getName()));
+            areaTagInfoTv.setText(String.format("%s%s", getString(R.string.areaTagTitle), area.getTag()));
 
             new MaterialAlertDialogBuilder(getContext()).setView(infoDialogView)
                     .setTitle(getResources().getString(R.string.areaInfoTitle))
@@ -341,7 +341,6 @@ public class MapFragment extends Fragment implements
                         .setPositiveButton(R.string.Ok, (dialog, which) -> {
                             fab.setIconResource(R.drawable.ic_baseline_check_24);
                             fab.setExtended(false);
-                            fab.setText("");
                             definingArea = true;
                             areaName = areaNameTv.getText().toString();
                             areaTag = areaTagTv.getText().toString();
@@ -349,29 +348,31 @@ public class MapFragment extends Fragment implements
                         .show();
 
             } else if(definingArea) {
-                Polygon polygon = gMap.addPolygon(new PolygonOptions()
-                        .clickable(true)
-                        .addAll(latLngList));
-                polygon.setTag(areaTag);
-                stylePolygon(polygon);
-                gMap.setOnPolygonClickListener(this);
-                currentPolygon = null;
+                if(!markerList.isEmpty()) {
+                    Polygon polygon = gMap.addPolygon(new PolygonOptions()
+                            .clickable(true)
+                            .addAll(latLngList));
+                    polygon.setTag(areaTag);
+                    stylePolygon(polygon);
+                    gMap.setOnPolygonClickListener(this);
 
-                Area area = new Area(new ArrayList(latLngList), new ArrayList(markerList), polygon, areaTag, areaName);
-                areaList.add(area);
+                    Area area = new Area(new ArrayList(latLngList), new ArrayList(markerList), polygon, areaTag, areaName);
+                    areaList.add(area);
 
-                for (Marker m: markerList) {
-                    m.setVisible(false);
+                    for (Marker m : markerList) {
+                        m.setVisible(false);
+                    }
+                    latLngList.clear();
+                    markerList.clear();
+                    areaTag = null;
+                    areaName = null;
+                    definingArea = false;
                 }
-                latLngList.clear();
-                markerList.clear();
-                areaTag = null;
-                areaName = null;
                 definingArea = false;
-
                 fab.setIconResource(R.drawable.ic_baseline_add_24);
+                fab.setText(R.string.Zone);
                 fab.setExtended(true);
-                fab.setText("Zone");
+
             } else if(modifyingArea) {
                 if(currentPolygon != null) {
                     Area area = getZoneFromPolygon(currentPolygon);
@@ -380,8 +381,8 @@ public class MapFragment extends Fragment implements
                 }
                 modifyingArea = false;
                 fab.setIconResource(R.drawable.ic_baseline_add_24);
+                fab.setText(R.string.Zone);
                 fab.setExtended(true);
-                fab.setText("Zone");
             }
         });
     }
