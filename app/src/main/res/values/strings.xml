@@ -47,4 +47,11 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
+
+    <string name="Annuler">Annuler</string>
+    <string name="Ok">Ok</string>
+    <string name="newZone">Nouvelle area</string>
+    <string name="areaInfoTitle">Information de la area</string>
+    <string name="Modifier">Modifier</string>
 </resources>
