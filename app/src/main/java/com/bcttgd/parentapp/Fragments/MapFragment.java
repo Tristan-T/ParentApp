@@ -159,13 +159,13 @@ public class MapFragment extends Fragment implements
     public void onPolygonClick(@NonNull Polygon polygon) {
         boolean isInPolygon = PolyUtil.containsLocation(new LatLng(53.520790, 17.404158), polygon.getPoints(), true);
 
-        currentPolygon = polygon;
         Area area = getZoneFromPolygon(polygon);
 
         if(isInPolygon) {
             CustomNotification.createOutOfZoneNotification("0664757895", "Kevin", area.getName(), "", getActivity(), getContext());
         }
         if(!modifyingArea && !definingArea) {
+            currentPolygon = polygon;
             infoDialogView = LayoutInflater.from(getContext())
                     .inflate(R.layout.area_info, null, false);
 
@@ -208,6 +208,17 @@ public class MapFragment extends Fragment implements
                 Marker marker = gMap.addMarker(markerOptions);
                 latLngList.add(latLng);
                 markerList.add(marker);
+                if(markerList.size() == 1) {
+                    Polygon polygon = gMap.addPolygon(new PolygonOptions()
+                            .clickable(true)
+                            .addAll(latLngList));
+                    polygon.setTag(areaTag);
+                    stylePolygon(polygon);
+                    gMap.setOnPolygonClickListener(this);
+                    currentPolygon = polygon;
+                } else {
+                    currentPolygon.setPoints(latLngList);
+                }
             }
         });
         gMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
@@ -219,7 +230,11 @@ public class MapFragment extends Fragment implements
             @Override
             public void onMarkerDragStart(Marker marker) {
                 temp = marker.getPosition();
-                if(currentPolygon != null) {
+                if(definingArea) {
+                    index = markerList.indexOf(marker);
+                    points = currentPolygon.getPoints();
+                }
+                else if(currentPolygon != null) {
                     area = getZoneFromMarker(marker);
                     index = area.getMarkerList().indexOf(marker);
                     points = currentPolygon.getPoints();
@@ -228,7 +243,7 @@ public class MapFragment extends Fragment implements
 
             @Override
             public void onMarkerDragEnd(Marker marker) {
-                if(currentPolygon != null) {
+                if(currentPolygon != null && !definingArea) {
                     index = area.getMarkerList().indexOf(marker);
                     if(index == 0) {
                         points.set(points.size() - 1, temp);
@@ -349,14 +364,14 @@ public class MapFragment extends Fragment implements
 
             } else if(definingArea) {
                 if(!markerList.isEmpty()) {
-                    Polygon polygon = gMap.addPolygon(new PolygonOptions()
-                            .clickable(true)
-                            .addAll(latLngList));
-                    polygon.setTag(areaTag);
-                    stylePolygon(polygon);
-                    gMap.setOnPolygonClickListener(this);
+//                    Polygon polygon = gMap.addPolygon(new PolygonOptions()
+//                            .clickable(true)
+//                            .addAll(latLngList));
+//                    polygon.setTag(areaTag);
+//                    stylePolygon(polygon);
+//                    gMap.setOnPolygonClickListener(this);
 
-                    Area area = new Area(new ArrayList(latLngList), new ArrayList(markerList), polygon, areaTag, areaName);
+                    Area area = new Area(new ArrayList(latLngList), new ArrayList(markerList), currentPolygon, areaTag, areaName);
                     areaList.add(area);
 
                     for (Marker m : markerList) {
@@ -367,6 +382,7 @@ public class MapFragment extends Fragment implements
                     areaTag = null;
                     areaName = null;
                     definingArea = false;
+                    currentPolygon = null;
                 }
                 definingArea = false;
                 fab.setIconResource(R.drawable.ic_baseline_add_24);
