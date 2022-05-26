@@ -175,6 +175,9 @@ public class MainActivity extends AppCompatActivity {
                     deviceIDs.add(ds.getKey());
                     menu.add(ds.getValue(String.class));
                     Log.d(TAG, "Value is: " + ds.getValue(String.class));
+
+                    selectedDevice = deviceIDs.get(0);
+                    selectedName = deviceNames.get(0);
                 }
             }
 
