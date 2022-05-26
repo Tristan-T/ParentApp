@@ -2,6 +2,7 @@ package com.bcttgd.parentapp.Fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -11,8 +12,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,16 +24,17 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bcttgd.parentapp.Area;
 import com.bcttgd.parentapp.CustomNotification;
-import com.bcttgd.parentapp.MainActivity;
 import com.bcttgd.parentapp.R;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Dash;
@@ -44,8 +48,20 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.google.maps.android.PolyUtil;
 
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -97,6 +113,7 @@ public class MapFragment extends Fragment implements
     boolean definingArea;
     boolean modifyingArea;
     ExtendedFloatingActionButton fab;
+    ExtendedFloatingActionButton fabLocation;
     List<LatLng> latLngList = new ArrayList<>();
     List<Marker> markerList = new ArrayList<>();
     Polygon currentPolygon = null;
@@ -104,9 +121,44 @@ public class MapFragment extends Fragment implements
     String areaTag;
     List<Area> areaList = new ArrayList<>();
     boolean hasLocationPermission;
+    private LocalDateTime lastTimeCheck;
+    boolean childMarkerCreated;
+    Marker childPositionMarker;
+    LatLng childPosition;
 
     public MapFragment() {
         // Required empty public constructor
+    }
+
+    private void drawAreas() {
+        List<Area> areaListPreferences = getAreaListFromPreferences("areaList");
+        if (areaListPreferences != null) {
+            areaList = areaListPreferences;
+            for (Area area : areaList) {
+                Log.d("system out", "area name : " + area.getName());
+                Log.d("system out", "area : " + area);
+                Polygon polygon = gMap.addPolygon(new PolygonOptions()
+                        .clickable(true)
+                        //.addAll(area.getPolygon().getPoints()));
+                        .addAll(area.getLatLngList()));
+                polygon.setTag(area.getTag());
+                stylePolygon(polygon);
+                area.setPolygon(polygon);
+                gMap.setOnPolygonClickListener(this);
+
+                List<Marker> temp = new ArrayList<>();
+                for (LatLng l : area.getLatLngList()) {
+                    MarkerOptions markerOptions = new MarkerOptions()
+                            .position(l)
+                            .draggable(true);
+                    //.icon(BitmapFromVector(getApplicationContext(), R.drawable.ic_baseline_location_on_24));
+                    Marker marker = gMap.addMarker(markerOptions);
+                    temp.add(marker);
+                }
+                area.setMarkerList(temp);
+                area.hideMarkers();
+            }
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -139,7 +191,6 @@ public class MapFragment extends Fragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -157,9 +208,11 @@ public class MapFragment extends Fragment implements
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onPolygonClick(@NonNull Polygon polygon) {
+        Toast.makeText(getContext(), "appuie zone", Toast.LENGTH_SHORT).show();
         boolean isInPolygon = PolyUtil.containsLocation(new LatLng(53.520790, 17.404158), polygon.getPoints(), true);
 
         Area area = getZoneFromPolygon(polygon);
+        Log.d("system out", "area after click polygon : " + area);
 
         if(isInPolygon) {
             CustomNotification.createOutOfZoneNotification("0664757895", "Kevin", area.getName(), "", getActivity(), getContext());
@@ -169,14 +222,20 @@ public class MapFragment extends Fragment implements
             infoDialogView = LayoutInflater.from(getContext())
                     .inflate(R.layout.area_info, null, false);
 
+            ImageButton deleteAreaBtn = infoDialogView.findViewById(R.id.deleteAreaBtn);
             TextView areaNameInfoTv = infoDialogView.findViewById(R.id.areaNameInfo);
             TextView areaTagInfoTv = infoDialogView.findViewById(R.id.areaTagInfo);
 
             areaNameInfoTv.setText(String.format("%s%s", getString(R.string.areaNameTitle), area.getName()));
             areaTagInfoTv.setText(String.format("%s%s", getString(R.string.areaTagTitle), area.getTag()));
 
-            new MaterialAlertDialogBuilder(getContext()).setView(infoDialogView)
+            AlertDialog alert = new MaterialAlertDialogBuilder(getContext()).setView(infoDialogView)
                     .setTitle(getResources().getString(R.string.areaInfoTitle))
+//                    .setNeutralButton(R.string.Delete, (dialog, which) -> {
+//                        area.getPolygon().remove();
+//                        areaList.remove(area);
+//                        saveAreaListToPreferences(areaList, "areaList");
+//                    })
                     .setNegativeButton(R.string.Annuler, (dialog, which) -> {
                     })
                     .setPositiveButton(R.string.Modifier, (dialog, which) -> {
@@ -187,18 +246,24 @@ public class MapFragment extends Fragment implements
                         area.drawMarkers();
                     })
                     .show();
+
+            deleteAreaBtn.setOnClickListener(view -> {
+                area.getPolygon().remove();
+                areaList.remove(area);
+                alert.dismiss();
+                saveAreaListToPreferences(areaList, "areaList");
+            });
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("PotentialBehaviorOverride")
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         gMap = googleMap;
+        this.drawAreas();
         //checkLocationPermission();
-        MarkerOptions markerOptionsTest = new MarkerOptions()
-                .position(new LatLng(53.520790, 17.404158))
-                .draggable(true);
-        gMap.addMarker(markerOptionsTest);
+
         gMap.setOnMapClickListener(latLng -> {
             if(definingArea) {
                 MarkerOptions markerOptions = new MarkerOptions()
@@ -220,6 +285,17 @@ public class MapFragment extends Fragment implements
                     currentPolygon.setPoints(latLngList);
                 }
             }
+        });
+        gMap.setOnMarkerClickListener(marker -> {
+            if(marker.equals(childPositionMarker)) {
+                long diff = java.time.Duration.between(lastTimeCheck, LocalDateTime.now()).getSeconds();
+                if(diff > 60) {
+                    long min = diff / 60;
+                    long sec = diff % 60;
+                    marker.setTitle("Il y a " + min + "min et " + sec + "sec");
+                } else marker.setTitle("Il y a " + diff + "sec");
+            }
+            return false;
         });
         gMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             LatLng temp = null;
@@ -272,6 +348,158 @@ public class MapFragment extends Fragment implements
                 marker.setPosition(temp);
             }
         });
+
+        String deviceID = getArguments().getString("device");
+        Log.d("system out", "device: " + deviceID);
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://devmobilem1-default-rtdb.europe-west1.firebasedatabase.app");
+        String reference = "users/" + mAuth.getCurrentUser().getUid() + "/devicesData/" + deviceID + "/location";
+        Log.d("DataFragment", reference);
+        DatabaseReference myRef = database.getReference(reference);
+
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String message = dataSnapshot.getValue(String.class);
+                Log.d("DataFragment", "Message: " + message);
+                double latitude = Double.parseDouble(message.split(",")[0]);
+                double longitude = Double.parseDouble(message.split(",")[1]);
+                childPosition = new LatLng(latitude, longitude);
+                checkChildLocation(childPosition, deviceID);
+
+                if(!childMarkerCreated) {
+                    MarkerOptions markerOptionsChildPos = new MarkerOptions()
+                            .position(childPosition)
+                            .draggable(false)
+                            .icon(BitmapFromVector(getContext(), R.drawable.ic_baseline_point_24));
+                    childPositionMarker = gMap.addMarker(markerOptionsChildPos);
+                    childMarkerCreated = true;
+                } else childPositionMarker.setPosition(childPosition);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    //@RequiresApi(api = Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(v, savedInstanceState);
+
+        childMarkerCreated = false;
+        mapView = (MapView) v.findViewById(R.id.map);
+        mapView.onCreate(savedInstanceState);
+        mapView.onResume();
+        mapView.getMapAsync(this);//when you already implement OnMapReadyCallback in your fragment
+
+        fab = v.findViewById(R.id.fab);
+        fabLocation = v.findViewById(R.id.fabLocation);
+        definingArea = false;
+        modifyingArea = false;
+
+        fabLocation.setOnClickListener(view -> {
+            gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(childPosition, 15));
+        });
+
+        fab.setOnClickListener(view -> {
+            if(!definingArea && !modifyingArea) {
+                customAlertDialogView = LayoutInflater.from(getContext())
+                        .inflate(R.layout.new_zone_dialog, null, false);
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                        R.layout.sensibilite_zone, TAGS);
+                AutoCompleteTextView textView = (AutoCompleteTextView) customAlertDialogView.findViewById(R.id.ZonesTags);
+                textView.setAdapter(adapter);
+
+                areaNameTv = customAlertDialogView.findViewById(R.id.areaName);
+                areaTagTv = textView;
+
+                new MaterialAlertDialogBuilder(getContext()).setView(customAlertDialogView)
+                        .setTitle(getResources().getString(R.string.newZone))
+                        .setNegativeButton(R.string.Annuler, (dialog, which) -> {})
+                        .setPositiveButton(R.string.Ok, (dialog, which) -> {
+                            fab.setIconResource(R.drawable.ic_baseline_check_24);
+                            fab.setExtended(false);
+                            definingArea = true;
+                            areaName = areaNameTv.getText().toString();
+                            areaTag = areaTagTv.getText().toString();
+                        })
+                        .show();
+
+            } else if(definingArea) {
+                if(!markerList.isEmpty()) {
+
+                    Area area = new Area(new ArrayList(latLngList), new ArrayList(markerList), currentPolygon, areaTag, areaName);
+                    areaList.add(area);
+
+                    for (Marker m : markerList) {
+                        m.setVisible(false);
+                    }
+                    latLngList.clear();
+                    markerList.clear();
+                    areaTag = null;
+                    areaName = null;
+                    definingArea = false;
+                    currentPolygon = null;
+                }
+                definingArea = false;
+                fab.setIconResource(R.drawable.ic_baseline_add_24);
+                fab.setText(R.string.Zone);
+                fab.setExtended(true);
+                saveAreaListToPreferences(areaList, "areaList");
+
+            } else if(modifyingArea) {
+                if(currentPolygon != null) {
+                    Area area = getZoneFromPolygon(currentPolygon);
+                    area.hideMarkers();
+                    currentPolygon = null;
+                }
+                modifyingArea = false;
+                fab.setIconResource(R.drawable.ic_baseline_add_24);
+                fab.setText(R.string.Zone);
+                fab.setExtended(true);
+                saveAreaListToPreferences(areaList, "areaList");
+            }
+        });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void checkChildLocation(LatLng position, String deviceID) {
+        lastTimeCheck = LocalDateTime.now();
+        for(Area area : areaList) {
+            Log.d("system out", "polygon points : " + area.getPolygon().getPoints());
+            Log.d("system out", "position : " + position);
+            boolean isInPolygon = PolyUtil.containsLocation(position, area.getPolygon().getPoints(), true);
+            Log.d("system out", "isInPolygon : " + isInPolygon);
+            if(isInPolygon) {
+                CustomNotification.createOutOfZoneNotification("0664757895", deviceID, area.getName(), "", getActivity(), getContext());
+            }
+            return;
+        }
+    }
+
+    private void saveAreaListToPreferences(List<Area> list, String key){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        GsonBuilder builder = new GsonBuilder();
+        Type type = new TypeToken<ArrayList<Area>>() {}.getType();
+        builder.excludeFieldsWithModifiers(Modifier.TRANSIENT);
+        String json = builder.create().toJson(list, type);
+        Log.d("system out", "json : " + json);
+        editor.putString(key, json);
+        editor.apply();
+    }
+
+    private ArrayList<Area> getAreaListFromPreferences(String key){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        Gson gson = new Gson();
+        String json = prefs.getString(key, null);
+        Type type = new TypeToken<ArrayList<Area>>() {}.getType();
+        return gson.fromJson(json, type);
     }
 
     private void stylePolygon(Polygon polygon) {
@@ -285,7 +513,6 @@ public class MapFragment extends Fragment implements
         int strokeColor = COLOR_BLACK_ARGB;
         int fillColor = COLOR_WHITE_ARGB;
 
-        Log.d("system out", "type : " + type);
         switch (type) {
             // If no type is given, allow the API to use the default.
             case SENSIBLE:
@@ -323,84 +550,5 @@ public class MapFragment extends Fragment implements
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    @Override
-    public void onViewCreated(View v, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(v, savedInstanceState);
-
-        mapView = (MapView) v.findViewById(R.id.map);
-        mapView.onCreate(savedInstanceState);
-        mapView.onResume();
-        mapView.getMapAsync(this);//when you already implement OnMapReadyCallback in your fragment
-
-        fab = v.findViewById(R.id.fab);
-        definingArea = false;
-        modifyingArea = false;
-
-        fab.setOnClickListener(view -> {
-            if(!definingArea && !modifyingArea) {
-                customAlertDialogView = LayoutInflater.from(getContext())
-                        .inflate(R.layout.new_zone_dialog, null, false);
-
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
-                        R.layout.sensibilite_zone, TAGS);
-                AutoCompleteTextView textView = (AutoCompleteTextView) customAlertDialogView.findViewById(R.id.ZonesTags);
-                textView.setAdapter(adapter);
-
-                areaNameTv = customAlertDialogView.findViewById(R.id.areaName);
-                areaTagTv = textView;
-
-                new MaterialAlertDialogBuilder(getContext()).setView(customAlertDialogView)
-                        .setTitle(getResources().getString(R.string.newZone))
-                        .setNegativeButton(R.string.Annuler, (dialog, which) -> {})
-                        .setPositiveButton(R.string.Ok, (dialog, which) -> {
-                            fab.setIconResource(R.drawable.ic_baseline_check_24);
-                            fab.setExtended(false);
-                            definingArea = true;
-                            areaName = areaNameTv.getText().toString();
-                            areaTag = areaTagTv.getText().toString();
-                        })
-                        .show();
-
-            } else if(definingArea) {
-                if(!markerList.isEmpty()) {
-//                    Polygon polygon = gMap.addPolygon(new PolygonOptions()
-//                            .clickable(true)
-//                            .addAll(latLngList));
-//                    polygon.setTag(areaTag);
-//                    stylePolygon(polygon);
-//                    gMap.setOnPolygonClickListener(this);
-
-                    Area area = new Area(new ArrayList(latLngList), new ArrayList(markerList), currentPolygon, areaTag, areaName);
-                    areaList.add(area);
-
-                    for (Marker m : markerList) {
-                        m.setVisible(false);
-                    }
-                    latLngList.clear();
-                    markerList.clear();
-                    areaTag = null;
-                    areaName = null;
-                    definingArea = false;
-                    currentPolygon = null;
-                }
-                definingArea = false;
-                fab.setIconResource(R.drawable.ic_baseline_add_24);
-                fab.setText(R.string.Zone);
-                fab.setExtended(true);
-
-            } else if(modifyingArea) {
-                if(currentPolygon != null) {
-                    Area area = getZoneFromPolygon(currentPolygon);
-                    area.hideMarkers();
-                    currentPolygon = null;
-                }
-                modifyingArea = false;
-                fab.setIconResource(R.drawable.ic_baseline_add_24);
-                fab.setText(R.string.Zone);
-                fab.setExtended(true);
-            }
-        });
-    }
-
 }
+

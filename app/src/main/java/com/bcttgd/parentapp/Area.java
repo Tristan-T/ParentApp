@@ -9,8 +9,8 @@ import java.util.List;
 public class Area {
 
     private List<LatLng> latLngList;
-    private List<Marker> markerList;
-    private Polygon polygon;
+    private transient List<Marker> markerList;
+    private transient Polygon polygon;
     private String tag;
     private String name;
 
@@ -52,5 +52,13 @@ public class Area {
 
     public String getName() {
         return name;
+    }
+
+    public void setPolygon(Polygon polygon) {
+        this.polygon = polygon;
+    }
+
+    public void setMarkerList(List<Marker> temp) {
+        markerList = temp;
     }
 }

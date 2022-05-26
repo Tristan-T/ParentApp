@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentContainerView;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -62,6 +63,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.PolyUtil;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -75,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseUser user;
     public String selectedDevice;
+    MapFragment mapFragment;
 
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -110,8 +113,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if(item.getItemId() == R.id.bottom_navigation_menu_item_map) {
-                    MapFragment mapFragment = new MapFragment();
-
+                    if(mapFragment == null) mapFragment = new MapFragment();
+                    mapFragment.setArguments(bundle);
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerMain, mapFragment).commit();
                     return true;
                 }
