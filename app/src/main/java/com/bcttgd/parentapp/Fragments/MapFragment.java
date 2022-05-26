@@ -208,7 +208,6 @@ public class MapFragment extends Fragment implements
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onPolygonClick(@NonNull Polygon polygon) {
-        Toast.makeText(getContext(), "appuie zone", Toast.LENGTH_SHORT).show();
         boolean isInPolygon = PolyUtil.containsLocation(new LatLng(53.520790, 17.404158), polygon.getPoints(), true);
 
         Area area = getZoneFromPolygon(polygon);
@@ -477,9 +476,11 @@ public class MapFragment extends Fragment implements
             boolean isInPolygon = PolyUtil.containsLocation(position, area.getPolygon().getPoints(), true);
             Log.d("system out", "isInPolygon : " + isInPolygon);
             if(isInPolygon) {
-                CustomNotification.createOutOfZoneNotification("0664757895", deviceName, area.getName(), "", getActivity(), getContext());
+                if(area.getTag().equals(SENSIBLE) || area.getTag().equals(MOY_SENSIBLE))
+                    CustomNotification.createSensibleZoneNotification(deviceName, area.getName(), getActivity(), getContext());
+                else CustomNotification.createVerySensibleZoneNotification(deviceName, area.getName(), getActivity(), getContext());
+                return;
             }
-            return;
         }
     }
 

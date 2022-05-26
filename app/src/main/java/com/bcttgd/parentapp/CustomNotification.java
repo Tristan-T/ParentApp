@@ -161,5 +161,18 @@ public class CustomNotification {
         managerCompat.notify(1, builder.build());
     }
 
+    public static void createVerySensibleZoneNotification(String child_name, String zone_name, Activity activity, Context context){
+        String title = "ChildSafe : "+child_name+" is not in a safe place (Very Sensible) !";
+        String content =  child_name +" is in : "+zone_name+".";
+        createUrgentNotification(title, content, "17", activity, context);
+    }
+
+    public static void createSensibleZoneNotification(String child_name, String zone_name, Activity activity, Context context){
+        String title = "ChildSafe : "+child_name+" is not in a safe place (Sensible) !";
+        String content =  child_name +" is in : "+zone_name+".";
+        createMinorNotification(title, content, "17", activity, context);
+    }
+
+
 
 }
