@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseUser user;
     public String selectedDevice;
+    public String selectedName;
     MapFragment mapFragment;
 
 
@@ -98,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Bundle bundle = new Bundle();
                 bundle.putString("device", selectedDevice);
+                bundle.putString("deviceName", selectedName);
                 // Google recommends to use if instead of switches
                 if(item.getItemId() == R.id.bottom_navigation_menu_item_data) {
                     //Pass the selected device to the fragment
@@ -211,8 +213,10 @@ public class MainActivity extends AppCompatActivity {
                 //Get the device ID
                 Log.d(TAG, "Device ID: " + deviceIDs.get(item.getItemId()));
                 String deviceID = deviceIDs.get(item.getItemId());
+                String deviceName = deviceNames.get(item.getItemId());
                 //Set the device ID
                 selectedDevice = deviceID;
+                selectedName = deviceName;
                 return true;
             }
         });

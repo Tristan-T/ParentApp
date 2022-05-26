@@ -350,6 +350,7 @@ public class MapFragment extends Fragment implements
         });
 
         String deviceID = getArguments().getString("device");
+        String deviceName = getArguments().getString("deviceName");
         Log.d("system out", "device: " + deviceID);
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://devmobilem1-default-rtdb.europe-west1.firebasedatabase.app");
@@ -365,7 +366,7 @@ public class MapFragment extends Fragment implements
                 double latitude = Double.parseDouble(message.split(",")[0]);
                 double longitude = Double.parseDouble(message.split(",")[1]);
                 childPosition = new LatLng(latitude, longitude);
-                checkChildLocation(childPosition, deviceID);
+                checkChildLocation(childPosition, deviceName);
 
                 if(!childMarkerCreated) {
                     MarkerOptions markerOptionsChildPos = new MarkerOptions()
@@ -468,7 +469,7 @@ public class MapFragment extends Fragment implements
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void checkChildLocation(LatLng position, String deviceID) {
+    private void checkChildLocation(LatLng position, String deviceName) {
         lastTimeCheck = LocalDateTime.now();
         for(Area area : areaList) {
             Log.d("system out", "polygon points : " + area.getPolygon().getPoints());
@@ -476,7 +477,7 @@ public class MapFragment extends Fragment implements
             boolean isInPolygon = PolyUtil.containsLocation(position, area.getPolygon().getPoints(), true);
             Log.d("system out", "isInPolygon : " + isInPolygon);
             if(isInPolygon) {
-                CustomNotification.createOutOfZoneNotification("0664757895", deviceID, area.getName(), "", getActivity(), getContext());
+                CustomNotification.createOutOfZoneNotification("0664757895", deviceName, area.getName(), "", getActivity(), getContext());
             }
             return;
         }

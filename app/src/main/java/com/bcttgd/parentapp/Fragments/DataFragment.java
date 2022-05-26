@@ -208,7 +208,6 @@ public class DataFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to read data", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
 }
